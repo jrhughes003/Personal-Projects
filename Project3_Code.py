@@ -73,10 +73,6 @@ elif project_identifier == 'P3B':
 # ---------------------------------------------------------------------------------
 
 
-# We both worked on the entire project together, the names above functions are representative of who
-# we thought came up with more of the main idea for that function
-
-
 # This function will dispense a container, using a number as an input,
 # and rotate it to the sensor
 def detect_container(container):
