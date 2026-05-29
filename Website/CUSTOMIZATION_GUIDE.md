@@ -8,8 +8,8 @@
 
 - `Jonny Hughes` → Your actual name
 - `jrhughes003@gmail.com` → Your email address
-- `jrhughes003` → Your GitHub username
-- `jrhughes003` → Your LinkedIn username (may be different from GitHub)
+- `[yourusername]` → Your GitHub username
+- `[yourusername]` → Your LinkedIn username (may be different from GitHub)
 
 ### 2. Professional Photo
 
