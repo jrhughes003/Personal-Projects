@@ -5,11 +5,11 @@ A collection of personal programming projects spanning web development, game dev
 ## Projects
 
 ### FinanceFlow - Personal Finance Tracker
-**Tech:** React, Vite, Tailwind CSS, Recharts
+**Tech:** React, Vite, Electron, SQLite, Tailwind CSS, Recharts, Anthropic API
 
-A full-featured personal finance management app that runs entirely in the browser using localStorage. Includes a transaction ledger with CSV import/export, budget management with rollover support, analytics dashboards with charts, savings goal tracking, investment portfolio allocation, and a debt payoff calculator with avalanche/snowball strategies.
+A local-first personal finance app that runs as a desktop app (Electron + SQLite) or in the browser (localStorage) from one codebase. Transaction ledger with CSV import/export, budgets with real rollover, analytics and forecasting, savings goals, investment and debt tracking, and a long-range "Plan Ahead" projection with Canadian tax treatment and Monte Carlo simulation. Optional AI features are opt-in and limited by a per-feature allow-list to the minimum data each one needs.
 
-`financial_tracker_app/`
+**Now in its own repository → [jrhughes003/financeflow](https://github.com/jrhughes003/financeflow)**
 
 ---
 
