@@ -8,7 +8,7 @@
 
    ```bash
    # Navigate to your website folder
-   cd "c:\Users\jrhug\OneDrive\Documents\GitHub\Personal-Projects\Website"
+   cd path/to/Personal-Projects/web/portfolio-website
 
    # Initialize git repository
    git init
