@@ -11,6 +11,13 @@ A local-first personal finance app that runs as a desktop app (Electron + SQLite
 
 → **[Live demo](https://jrhughes003.github.io/financeflow/)** · **[Source](https://github.com/jrhughes003/financeflow)**
 
+### [Blackjack Trainer](games/blackjack-trainer/) — Card Counting & Strategy Trainer
+**Electron · React · TypeScript · Vite · Vitest · Playwright · GitHub Actions**
+
+A desktop trainer for blackjack basic strategy, card counting (Hi-Lo, Omega II, Zen) and count-based play. It has strategy drills with charts that follow the table rules, speed-counting drills, and a full table simulation. At the table, a coach grades every bet, insurance call and play, including Illustrious 18 and Fab 4 index plays. It also supports popular casino side bets (21+3, Perfect Pairs, Lucky Ladies, Buster Blackjack), with each bet's exact EV calculated from the cards left in the shoe. Installers for Windows, macOS and Linux are built automatically from version tags.
+
+→ **[README](games/blackjack-trainer/)** · **[Design decisions](games/blackjack-trainer/docs/DECISIONS.md)**
+
 ### [Portfolio Website](https://jrhughes003.github.io/Jonny-Hughes/)
 **HTML · CSS · JavaScript**
 
@@ -37,6 +44,7 @@ My personal portfolio, hosted on GitHub Pages.
 │   ├── php-blog/              # PHP + MySQL blog
 │   └── php-dice-game/         # PHP dice game
 ├── games/
+│   ├── blackjack-trainer/     # Electron + React card-counting trainer
 │   └── unity-racing-game/     # Unity C# scripts
 ├── robotics/
 │   └── recycling-robot/       # Sensor-driven sorting robot
@@ -49,4 +57,4 @@ My personal portfolio, hosted on GitHub Pages.
 
 ## Languages
 
-C++ · C# · Python · JavaScript · PHP · HTML/CSS · SQL
+C++ · C# · Python · TypeScript · JavaScript · PHP · HTML/CSS · SQL
