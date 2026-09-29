@@ -13,6 +13,15 @@ A local-first personal finance app that runs as a desktop app (Electron + SQLite
 
 ---
 
+### Blackjack Trainer
+**Tech:** Electron, React, TypeScript, Vite, Vitest
+
+A desktop trainer for blackjack basic strategy and card counting. Strategy drills with rule-aware charts (H17/S17, DAS, surrender), Hi-Lo / Omega II / Zen counting drills (card flash, deck countdown, true-count conversion), and a full table simulation that grades every bet, insurance call and play, including Illustrious 18 / Fab 4 index plays. Progress and most-missed situations are tracked locally.
+
+`BlackjackTrainer/`
+
+---
+
 ### Portfolio Website
 **Tech:** HTML, CSS, JavaScript
 
@@ -78,4 +87,4 @@ A demonstration of generic template programming with a parameterized `Pair` clas
 
 ## Languages Used
 
-C++ | C# | Python | JavaScript/React | PHP | HTML/CSS | C | SQL
+C++ | C# | Python | JavaScript/React | TypeScript | PHP | HTML/CSS | C | SQL
