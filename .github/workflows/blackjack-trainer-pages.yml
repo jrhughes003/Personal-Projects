@@ -1,7 +1,9 @@
 name: Blackjack Trainer web deploy
 
-# Manual only: publishing to GitHub Pages replaces whatever site this repository
-# already serves there. Run it from the Actions tab once Pages is set to "GitHub Actions".
+# Manual only, so publishing is a deliberate step. Before the first run, set
+# Settings → Pages → Source to "GitHub Actions". The site is served at
+# https://jrhughes003.github.io/Personal-Projects/.
+
 on:
   workflow_dispatch:
 
@@ -19,20 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: BlackjackTrainer
+        working-directory: games/blackjack-trainer
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: BlackjackTrainer/.nvmrc
+          node-version-file: games/blackjack-trainer/.nvmrc
           cache: npm
-          cache-dependency-path: BlackjackTrainer/package-lock.json
+          cache-dependency-path: games/blackjack-trainer/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: BlackjackTrainer/dist
+          path: games/blackjack-trainer/dist
 
   deploy:
     needs: build

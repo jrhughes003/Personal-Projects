@@ -1,0 +1,9 @@
+node_modules/
+dist/
+release/
+*.tsbuildinfo
+test-results/
+playwright-report/
+
+# The repo root ignores build/; this app keeps its installer icon there.
+!build/

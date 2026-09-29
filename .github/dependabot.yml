@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /BlackjackTrainer
+    directory: /games/blackjack-trainer
     schedule:
       interval: monthly
     groups:

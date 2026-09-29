@@ -1,90 +1,60 @@
 # Personal Projects
 
-A collection of personal programming projects spanning web development, game development, robotics, and more.
+A collection of my programming projects, from high-school coursework to university design projects and personal tools. Each project lives in its own folder with a README explaining what it does and how to run it.
 
-## Projects
+## Featured
 
-### FinanceFlow - Personal Finance Tracker
-**Tech:** React, Vite, Electron, SQLite, Tailwind CSS, Recharts, Anthropic API
+### [FinanceFlow](https://github.com/jrhughes003/financeflow) — Personal Finance Tracker
+**React · Vite · Electron · SQLite · Tailwind CSS · Recharts · Anthropic API**
 
 A local-first personal finance app that runs as a desktop app (Electron + SQLite) or in the browser (localStorage) from one codebase. Transaction ledger with CSV import/export, budgets with real rollover, analytics and forecasting, savings goals, investment and debt tracking, and a long-range "Plan Ahead" projection with Canadian tax treatment and Monte Carlo simulation. Optional AI features are opt-in and limited by a per-feature allow-list to the minimum data each one needs.
 
-**Now in its own repository → [jrhughes003/financeflow](https://github.com/jrhughes003/financeflow)**
+→ **[Live demo](https://jrhughes003.github.io/financeflow/)** · **[Source](https://github.com/jrhughes003/financeflow)**
 
----
+### [Blackjack Trainer](games/blackjack-trainer/) — Card Counting & Strategy Trainer
+**Electron · React · TypeScript · Vite · Vitest · Playwright · GitHub Actions**
 
-### Blackjack Trainer
-**Tech:** Electron, React, TypeScript, Vite, Vitest, Playwright, GitHub Actions
+A desktop trainer for blackjack basic strategy, card counting (Hi-Lo, Omega II, Zen) and count-based play. It has strategy drills with charts that follow the table rules, speed-counting drills, and a full table simulation. At the table, a coach grades every bet, insurance call and play, including Illustrious 18 and Fab 4 index plays. It also supports popular casino side bets (21+3, Perfect Pairs, Lucky Ladies, Buster Blackjack), with each bet's exact EV calculated from the cards left in the shoe. Installers for Windows, macOS and Linux are built automatically from version tags.
 
-A desktop trainer for blackjack basic strategy, card counting and count-based play. It includes strategy drills with charts that follow the table rules (H17/S17, DAS, surrender, doubling restrictions), Hi-Lo / Omega II / Zen counting drills, and a full table simulation. At the table, a coach grades every bet, insurance call and play, including Illustrious 18 and Fab 4 index plays. It also supports the popular side bets (21+3, Perfect Pairs, Lucky Ladies, Buster Blackjack), with custom paytables and each bet's exact EV calculated from the cards left in the shoe. Installers for Windows, macOS and Linux are built automatically from version tags.
+→ **[README](games/blackjack-trainer/)** · **[Design decisions](games/blackjack-trainer/docs/DECISIONS.md)**
 
-`BlackjackTrainer/` · [README](BlackjackTrainer/README.md) · [Design decisions](BlackjackTrainer/docs/DECISIONS.md)
+### [Portfolio Website](https://jrhughes003.github.io/Jonny-Hughes/)
+**HTML · CSS · JavaScript**
 
----
+My personal portfolio, hosted on GitHub Pages.
 
-### Portfolio Website
-**Tech:** HTML, CSS, JavaScript
+→ **[Visit the site](https://jrhughes003.github.io/Jonny-Hughes/)** · **[Source](https://github.com/jrhughes003/Jonny-Hughes)**
 
-A responsive portfolio website with sections for projects, skills, experience, and contact info. Features a mobile-friendly hamburger nav, social media links, and project showcase cards.
+## Projects
 
-`Website/`
+| Project | Tech | Description |
+| --- | --- | --- |
+| [Recycling Robot Controller](robotics/recycling-robot/) | Python | University design project: classifies containers with inductive, photoelectric, and load-cell sensors, then drives a line-following robot to deliver them to the right bin. |
+| [Musical Script Analyzer](tools/musical-script-analyzer/) | Python | Parses a musical's script (PDF, text, or `.sbx`) and reports each character's lines by scene and song. |
+| [Unity Racing Game](games/unity-racing-game/) | C#, Unity | Gameplay scripts for a racing game: car selection, countdown, AI opponents, lap timing, and camera control. *(High school)* |
+| [Blog Platform](web/php-blog/) | PHP, MySQL | Multi-user blog with registration, session-based login, categorized posts, and profile editing. *(High school)* |
+| [Dice Game](web/php-dice-game/) | PHP | Yahtzee-style dice game with session-based state. |
+| [Experiments](experiments/) | C++ | Small programs: a Monte Carlo birthday-paradox simulation and a C++ class-template demo. |
 
----
+## Repository layout
 
-### Racing Game Scripts
-**Tech:** C#, Unity
+```
+.
+├── web/
+│   ├── php-blog/              # PHP + MySQL blog
+│   └── php-dice-game/         # PHP dice game
+├── games/
+│   ├── blackjack-trainer/     # Electron + React card-counting trainer
+│   └── unity-racing-game/     # Unity C# scripts
+├── robotics/
+│   └── recycling-robot/       # Sensor-driven sorting robot
+├── tools/
+│   └── musical-script-analyzer/  # Script line-count utilities
+└── experiments/
+    ├── birthday-paradox/      # C++ simulation
+    └── cpp-templates/         # C++ template demo
+```
 
-Scripts for a Unity racing game featuring car selection, a 3-2-1 countdown system, AI opponents, lap timing, camera control, and race-end logic. Uses TextMeshPro for UI and Rigidbody physics for car movement.
+## Languages
 
-`Highschool/CarGame_Scripts/`
-
----
-
-### Blog Platform
-**Tech:** PHP, MySQL
-
-A multi-user blog system with user registration, login authentication with session management, post creation with category tagging (Sports, History, News, Other), and user profile editing. Passwords are hashed with PHP's `password_hash()`.
-
-`Highschool/Blog_1/`
-
----
-
-### Recycling Robot Controller
-**Tech:** Python
-
-A control system for a recycling/bin-sorting robot that classifies containers using sensor fusion (inductive, photoelectric, load cell, color, ultrasonic, and line-following sensors). Handles the full workflow of detecting, classifying, transferring, and delivering containers to the correct bins.
-
-`Misc/Project3_Code.py`
-
----
-
-### Yahtzee Dice Game
-**Tech:** PHP, Bootstrap
-
-A browser-based Yahtzee-style dice game with session-based state management. Players roll dice, choose which to keep, and try to keep their running total under 11 points.
-
-`Misc/yahtzee.php`
-
----
-
-### Birthday Paradox Simulation
-**Tech:** C++
-
-A statistical simulation that verifies the birthday paradox by running 700 experiments per group size (5 to 100 people) and computing the probability that two people share a birthday.
-
-`Misc/birthday_probablity_experiment.cpp`
-
----
-
-### C++ Templates Demo
-**Tech:** C++
-
-A demonstration of generic template programming with a parameterized `Pair` class that accepts two different types.
-
-`Misc/Classes1.cpp`
-
----
-
-## Languages Used
-
-C++ | C# | Python | JavaScript/React | TypeScript | PHP | HTML/CSS | C | SQL
+C++ · C# · Python · TypeScript · JavaScript · PHP · HTML/CSS · SQL

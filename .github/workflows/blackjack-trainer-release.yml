@@ -12,7 +12,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: BlackjackTrainer
+    working-directory: games/blackjack-trainer
 
 jobs:
   package:
@@ -26,9 +26,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: BlackjackTrainer/.nvmrc
+          node-version-file: games/blackjack-trainer/.nvmrc
           cache: npm
-          cache-dependency-path: BlackjackTrainer/package-lock.json
+          cache-dependency-path: games/blackjack-trainer/package-lock.json
       - name: Tag matches package.json
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
@@ -46,10 +46,10 @@ jobs:
         with:
           name: installers-${{ matrix.os }}
           path: |
-            BlackjackTrainer/release/*.exe
-            BlackjackTrainer/release/*.dmg
-            BlackjackTrainer/release/*.AppImage
-            BlackjackTrainer/release/*.deb
+            games/blackjack-trainer/release/*.exe
+            games/blackjack-trainer/release/*.dmg
+            games/blackjack-trainer/release/*.AppImage
+            games/blackjack-trainer/release/*.deb
           if-no-files-found: error
 
   release:
