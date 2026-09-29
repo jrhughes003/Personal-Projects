@@ -55,8 +55,10 @@ describe('basic strategy (4–8 decks)', () => {
 
   it('falls back when a move is unavailable', () => {
     const three = hand('2', '3', '6')
-    expect(basicStrategy(three, 6, S17, { canDouble: false, canSplit: false, canSurrender: false })).toBe('hit')
-    expect(basicStrategy(hand('A', '3', '4'), 5, S17, { canDouble: false, canSplit: false, canSurrender: false })).toBe('stand')
+    expect(basicStrategy(three, 6, S17, { canHit: true, canDouble: false, canSplit: false, canSurrender: false })).toBe('hit')
+    expect(
+      basicStrategy(hand('A', '3', '4'), 5, S17, { canHit: true, canDouble: false, canSplit: false, canSurrender: false }),
+    ).toBe('stand')
     expect(basicStrategy(hand('10', '6'), 10, S17, noSurrender)).toBe('hit')
     expect(basicStrategy(hand('8', '8'), 10, S17, { ...noSurrender, canSplit: false })).toBe('hit')
   })

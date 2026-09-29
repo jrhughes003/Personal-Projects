@@ -3,7 +3,7 @@ import { PlayingCard } from '../components/PlayingCard'
 import { useHotkeys } from '../components/useHotkeys'
 import { makeDeck, makeShoe, shuffle, type Card } from '../engine/cards'
 import { acceptableTrueCounts, countCards, formatCount, SYSTEMS, tagOf, trueCount } from '../engine/counting'
-import { useApp } from '../store/AppContext'
+import { useApp } from '../store/context'
 import { withCount } from '../store/stats'
 
 type Tab = 'flash' | 'countdown' | 'truecount'
@@ -19,7 +19,9 @@ export function CountingDrill() {
           <h1>Counting drills</h1>
           <p className="muted">
             Counting with <b>{sys.name}</b>:{' '}
-            {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((v) => `${v === 11 ? 'A' : v === 10 ? 'T' : v} ${formatCount(sys.tags[v])}`).join(' · ')}
+            {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+              .map((v) => `${v === 11 ? 'A' : v === 10 ? 'T' : v} ${formatCount(sys.tags[v])}`)
+              .join(' · ')}
           </p>
         </div>
         <div className="segmented">
@@ -146,7 +148,14 @@ function FlashDrill() {
             </label>
             <label className="grow">
               Speed: {(speed / 1000).toFixed(2)}s per flash
-              <input type="range" min={200} max={2000} step={50} value={speed} onChange={(e) => setSpeed(Number(e.target.value))} />
+              <input
+                type="range"
+                min={200}
+                max={2000}
+                step={50}
+                value={speed}
+                onChange={(e) => setSpeed(Number(e.target.value))}
+              />
             </label>
             <button className="primary" onClick={start}>
               Start ↵
@@ -253,7 +262,12 @@ function CountdownDrill() {
     updateStats((s) =>
       withCount(
         s,
-        { mode: 'countdown', system: SYSTEMS[system].name, correct: guess === actual, detail: `51 cards in ${(elapsed / 1000).toFixed(1)}s` },
+        {
+          mode: 'countdown',
+          system: SYSTEMS[system].name,
+          correct: guess === actual,
+          detail: `51 cards in ${(elapsed / 1000).toFixed(1)}s`,
+        },
         elapsed,
       ),
     )
@@ -274,10 +288,12 @@ function CountdownDrill() {
         {phase === 'ready' && (
           <div className="result">
             <p>
-              One card is secretly removed. Count down the other 51 as fast as you can (Space or → for the next card). A balanced count
-              ends at the negative of the missing card's tag, so your final count tells you what's missing.
+              One card is secretly removed. Count down the other 51 as fast as you can (Space or → for the next card). A balanced
+              count ends at the negative of the missing card's tag, so your final count tells you what's missing.
             </p>
-            {stats.bestCountdownMs !== null && <p className="muted">Personal best: {(stats.bestCountdownMs / 1000).toFixed(1)}s</p>}
+            {stats.bestCountdownMs !== null && (
+              <p className="muted">Personal best: {(stats.bestCountdownMs / 1000).toFixed(1)}s</p>
+            )}
             <button className="primary" onClick={begin}>
               Start (Space)
             </button>
@@ -371,7 +387,10 @@ function TrueCountDrill() {
     <div className="drill-layout single">
       <section className="felt count-stage">
         <div className="scorebar inline">
-          Score <b>{score.correct}/{score.attempts}</b>
+          Score{' '}
+          <b>
+            {score.correct}/{score.attempts}
+          </b>
         </div>
         <div className="tc-question">
           <div>
@@ -390,10 +409,12 @@ function TrueCountDrill() {
         {result && (
           <div className="result">
             <div className={`verdict ${result.ok ? 'ok' : 'bad'}`}>
-              {result.ok ? 'Correct' : `Not quite (you said ${formatCount(result.guess)})`} — {formatCount(q.rc)} ÷ {q.cardsLeft / 52} ={' '}
-              {result.exact.toFixed(2)}
+              {result.ok ? 'Correct' : `Not quite (you said ${formatCount(result.guess)})`} — {formatCount(q.rc)} ÷{' '}
+              {q.cardsLeft / 52} = {result.exact.toFixed(2)}
             </div>
-            <p className="muted small">Flooring, truncating or rounding are all accepted; the table sim floors (so +2.9 plays as +2).</p>
+            <p className="muted small">
+              Flooring, truncating or rounding are all accepted; the table sim floors (so +2.9 plays as +2).
+            </p>
             <button className="primary" onClick={next}>
               Next ↵
             </button>

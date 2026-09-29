@@ -5,12 +5,15 @@ import { recommend, shouldTakeInsurance } from './deviations'
 import { generateDrillHand } from './drill'
 import { act, availability, dealerUpValue, decideInsurance, newGame, placeBet, roundNet, unseenCards } from './game'
 import { DEFAULT_RULES, type Rules } from './rules'
+import { paytableFor, SIDE_BET_IDS } from './sidebets'
 
 const RULESETS: Rules[] = [
   DEFAULT_RULES,
   { ...DEFAULT_RULES, h17: true, das: false, surrender: false, decks: 8, penetration: 0.9 },
-  { ...DEFAULT_RULES, decks: 4, blackjackPays: 1.2 },
+  { ...DEFAULT_RULES, decks: 4, blackjackPays: 1.2, doubleOn: '10-11', resplitAces: true, maxHands: 3 },
 ]
+
+const SIDES = SIDE_BET_IDS.map((id) => ({ id, amount: 5, paytable: paytableFor(id) }))
 
 describe('engine fuzz', () => {
   it.each(RULESETS.map((r, i) => [i, r] as const))('plays 3000 rounds cleanly (ruleset %i)', (_i, rules) => {
@@ -19,7 +22,8 @@ describe('engine fuzz', () => {
     for (let round = 0; round < 3000; round++) {
       const before = s.bankroll
       const tc = trueCount(s.runningCount, unseenCards(s))
-      s = placeBet(s, 10 * betUnits(tc, 'hilo'), rng)
+      // Every other round carries all four side bets, exercising their settlement paths.
+      s = placeBet(s, 10 * betUnits(tc, 'hilo'), rng, round % 2 ? SIDES : [])
       if (s.phase === 'insurance') {
         s = decideInsurance(s, shouldTakeInsurance(trueCount(s.runningCount, unseenCards(s)), 'hilo', true))
       }

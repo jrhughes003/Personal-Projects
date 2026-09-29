@@ -32,3 +32,12 @@ describe('counting systems', () => {
     expect(acceptableTrueCounts(-1.5).sort()).toEqual([-1, -2])
   })
 })
+
+describe('bet spreads', () => {
+  it('tops out at the chosen spread', () => {
+    expect(betUnits(10, 'hilo', 4)).toBe(4)
+    expect(betUnits(10, 'hilo', 12)).toBe(12)
+    expect(betUnits(3, 'hilo', 12)).toBe(4)
+    expect(betUnits(0, 'hilo', 12)).toBe(1)
+  })
+})

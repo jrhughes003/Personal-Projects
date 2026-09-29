@@ -1,13 +1,9 @@
-/** localStorage with graceful failure: the app must still run if storage is unavailable. */
+/** localStorage with graceful failure: the app must still run if storage is unavailable. Callers normalize the shape. */
 export function load<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key)
     if (!raw) return fallback
-    const parsed = JSON.parse(raw)
-    if (typeof fallback === 'object' && fallback !== null && !Array.isArray(fallback)) {
-      return { ...fallback, ...parsed }
-    }
-    return parsed as T
+    return JSON.parse(raw) as T
   } catch {
     return fallback
   }

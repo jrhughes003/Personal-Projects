@@ -12,7 +12,11 @@ export interface Rules {
   /** Fraction of the shoe dealt before the cut card, 0.5–0.9. */
   penetration: number
   /** Most hands a player can split into. */
-  maxHands: number
+  maxHands: 2 | 3 | 4
+  /** Which two-card hands may double: any, hard 9–11, or hard 10–11 (common in Europe and some US rooms). */
+  doubleOn: 'any' | '9-11' | '10-11'
+  /** Split aces may be split again when another ace lands on them. */
+  resplitAces: boolean
 }
 
 export const DEFAULT_RULES: Rules = {
@@ -23,6 +27,15 @@ export const DEFAULT_RULES: Rules = {
   blackjackPays: 1.5,
   penetration: 0.75,
   maxHands: 4,
+  doubleOn: 'any',
+  resplitAces: false,
+}
+
+/** Whether these rules allow doubling a two-card hand of this total. */
+export function doubleAllowedFor(total: number, soft: boolean, rules: Pick<Rules, 'doubleOn'>): boolean {
+  if (rules.doubleOn === 'any') return true
+  if (soft) return false
+  return rules.doubleOn === '9-11' ? total >= 9 && total <= 11 : total >= 10 && total <= 11
 }
 
 export function describeRules(r: Rules): string {
@@ -32,6 +45,10 @@ export function describeRules(r: Rules): string {
     r.das ? 'DAS' : 'no DAS',
     r.surrender ? 'late surrender' : 'no surrender',
     `BJ pays ${r.blackjackPays === 1.5 ? '3:2' : '6:5'}`,
+    r.doubleOn === 'any' ? 'double any two' : `double ${r.doubleOn} only`,
+    r.resplitAces ? 'RSA' : null,
     `${Math.round(r.penetration * 100)}% penetration`,
-  ].join(' · ')
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }

@@ -14,11 +14,11 @@ A local-first personal finance app that runs as a desktop app (Electron + SQLite
 ---
 
 ### Blackjack Trainer
-**Tech:** Electron, React, TypeScript, Vite, Vitest
+**Tech:** Electron, React, TypeScript, Vite, Vitest, Playwright, GitHub Actions
 
-A desktop trainer for blackjack basic strategy and card counting. Strategy drills with rule-aware charts (H17/S17, DAS, surrender), Hi-Lo / Omega II / Zen counting drills (card flash, deck countdown, true-count conversion), and a full table simulation that grades every bet, insurance call and play, including Illustrious 18 / Fab 4 index plays. Progress and most-missed situations are tracked locally.
+A desktop trainer for blackjack basic strategy, card counting and count-based play. It includes strategy drills with charts that follow the table rules (H17/S17, DAS, surrender, doubling restrictions), Hi-Lo / Omega II / Zen counting drills, and a full table simulation. At the table, a coach grades every bet, insurance call and play, including Illustrious 18 and Fab 4 index plays. It also supports the popular side bets (21+3, Perfect Pairs, Lucky Ladies, Buster Blackjack), with custom paytables and each bet's exact EV calculated from the cards left in the shoe. Installers for Windows, macOS and Linux are built automatically from version tags.
 
-`BlackjackTrainer/`
+`BlackjackTrainer/` · [README](BlackjackTrainer/README.md) · [Design decisions](BlackjackTrainer/docs/DECISIONS.md)
 
 ---
 

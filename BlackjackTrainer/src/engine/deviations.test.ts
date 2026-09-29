@@ -44,7 +44,14 @@ describe('Hi-Lo deviations', () => {
   })
 
   it('ignores a double index when doubling is not allowed', () => {
-    const r = recommend(hand('4', '3', '3'), 10, rules, { canDouble: false, canSplit: false, canSurrender: false }, 6, true)
+    const r = recommend(
+      hand('4', '3', '3'),
+      10,
+      rules,
+      { canHit: true, canDouble: false, canSplit: false, canSurrender: false },
+      6,
+      true,
+    )
     expect(r.action).toBe('hit')
   })
 

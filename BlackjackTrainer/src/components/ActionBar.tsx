@@ -18,10 +18,7 @@ export function ActionBar({ avail, onAction, disabled, correct, chosen }: Props)
   const allowed = (a: Action) =>
     a === 'double' ? avail.canDouble : a === 'split' ? avail.canSplit : a === 'surrender' ? avail.canSurrender : true
 
-  useHotkeys(
-    Object.fromEntries(ORDER.map((a) => [KEYS[a], () => allowed(a) && onAction(a)])),
-    !disabled,
-  )
+  useHotkeys(Object.fromEntries(ORDER.map((a) => [KEYS[a], () => allowed(a) && onAction(a)])), !disabled)
 
   return (
     <div className="action-bar">

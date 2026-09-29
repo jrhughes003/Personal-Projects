@@ -1,6 +1,6 @@
 import { rankValue, type Card } from './cards'
 import { handTotal, isPair } from './hand'
-import type { Rules } from './rules'
+import { doubleAllowedFor, type Rules } from './rules'
 
 export type Action = 'hit' | 'stand' | 'double' | 'split' | 'surrender'
 
@@ -14,12 +14,14 @@ export type ChartCode = 'H' | 'S' | 'D' | 'Ds' | 'P' | 'Rh' | 'Rs' | 'Rp'
 export type TableKind = 'hard' | 'soft' | 'pair'
 
 export interface Availability {
+  /** False only on split aces, which take no more cards. */
+  canHit: boolean
   canDouble: boolean
   canSplit: boolean
   canSurrender: boolean
 }
 
-export const ALL_AVAILABLE: Availability = { canDouble: true, canSplit: true, canSurrender: true }
+export const ALL_AVAILABLE: Availability = { canHit: true, canDouble: true, canSplit: true, canSurrender: true }
 
 /** Dealer upcards in chart column order: 2–10, then ace (11). */
 export const DEALER_COLUMNS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -182,13 +184,26 @@ export function basicStrategy(
   return resolveCode(lookupChart(cards, dealerUp, rules, avail.canSplit).code, avail)
 }
 
-/** What a chart printed for these rules shows in a cell (surrender codes collapse when surrender is off). */
-export function displayCode(code: ChartCode, rules: Pick<Rules, 'surrender'>): ChartCode {
-  if (rules.surrender) return code
-  if (code === 'Rh') return 'H'
-  if (code === 'Rs') return 'S'
-  if (code === 'Rp') return 'P'
-  return code
+/**
+ * What a chart printed for these rules shows in a cell: surrender codes collapse
+ * when surrender is off, and doubles collapse where the double rule forbids them.
+ */
+export function displayCode(
+  code: ChartCode,
+  rules: Pick<Rules, 'surrender' | 'doubleOn'>,
+  table: TableKind,
+  rowKey: number,
+): ChartCode {
+  let c = code
+  if (!rules.surrender) {
+    if (c === 'Rh') c = 'H'
+    else if (c === 'Rs') c = 'S'
+    else if (c === 'Rp') c = 'P'
+  }
+  if ((c === 'D' || c === 'Ds') && table !== 'pair' && !doubleAllowedFor(rowKey, table === 'soft', rules)) {
+    c = c === 'D' ? 'H' : 'S'
+  }
+  return c
 }
 
 export const ACTION_LABELS: Record<Action, string> = {

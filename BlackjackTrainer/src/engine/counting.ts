@@ -70,22 +70,42 @@ export function formatCount(n: number): string {
   return String(n)
 }
 
-/**
- * A 1–8 unit spread. Level-2 counts run about twice as large as Hi-Lo for
- * the same advantage, so their true count is halved before the ramp.
- */
-export const BET_RAMP: { minTc: number; units: number }[] = [
-  { minTc: -Infinity, units: 1 },
-  { minTc: 2, units: 2 },
-  { minTc: 3, units: 4 },
-  { minTc: 4, units: 6 },
-  { minTc: 5, units: 8 },
-]
+export type Spread = 4 | 8 | 12
 
-export function betUnits(tc: number, system: SystemId): number {
+/**
+ * Bet ramps keyed by top spread. Level-2 counts run about twice as large as
+ * Hi-Lo for the same advantage, so their true count is halved before the ramp.
+ */
+export const BET_RAMPS: Record<Spread, { minTc: number; units: number }[]> = {
+  4: [
+    { minTc: -Infinity, units: 1 },
+    { minTc: 2, units: 2 },
+    { minTc: 3, units: 3 },
+    { minTc: 4, units: 4 },
+  ],
+  8: [
+    { minTc: -Infinity, units: 1 },
+    { minTc: 2, units: 2 },
+    { minTc: 3, units: 4 },
+    { minTc: 4, units: 6 },
+    { minTc: 5, units: 8 },
+  ],
+  12: [
+    { minTc: -Infinity, units: 1 },
+    { minTc: 2, units: 2 },
+    { minTc: 3, units: 4 },
+    { minTc: 4, units: 8 },
+    { minTc: 5, units: 12 },
+  ],
+}
+
+/** Kept for callers that assume the default 1–8 spread. */
+export const BET_RAMP = BET_RAMPS[8]
+
+export function betUnits(tc: number, system: SystemId, spread: Spread = 8): number {
   const adjusted = flooredTrueCount(tc / SYSTEMS[system].level)
   let units = 1
-  for (const step of BET_RAMP) if (adjusted >= step.minTc) units = step.units
+  for (const step of BET_RAMPS[spread]) if (adjusted >= step.minTc) units = step.units
   return units
 }
 

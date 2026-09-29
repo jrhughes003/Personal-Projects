@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActionBar } from '../components/ActionBar'
 import { describeDecision } from '../components/explain'
 import { PlayingCard } from '../components/PlayingCard'
@@ -9,7 +9,7 @@ import { formatCount } from '../engine/counting'
 import { deviationLabel, recommend, type Recommendation } from '../engine/deviations'
 import { generateDrillHand, type DrillFocus, type DrillHand } from '../engine/drill'
 import { ACTION_LABELS, lookupChart, type Action } from '../engine/strategy'
-import { useApp } from '../store/AppContext'
+import { useApp } from '../store/context'
 import { withDecision } from '../store/stats'
 
 const FOCUSES: { id: DrillFocus; label: string }[] = [
@@ -38,18 +38,17 @@ export function StrategyDrill() {
   const shownAt = useRef(performance.now())
   const advanceTimer = useRef<number | undefined>(undefined)
 
-  const next = useCallback(
-    (f: DrillFocus = focus) => {
-      window.clearTimeout(advanceTimer.current)
-      setHand(generateDrillHand(f, rules))
-      setAnswer(null)
-      shownAt.current = performance.now()
-    },
-    [focus, rules],
-  )
+  const next = (f: DrillFocus = focus) => {
+    window.clearTimeout(advanceTimer.current)
+    setHand(generateDrillHand(f, rules))
+    setAnswer(null)
+    shownAt.current = performance.now()
+  }
 
-  // New rules or focus → new question.
-  useEffect(() => next(focus), [focus, rules])
+  const changeFocus = (f: DrillFocus) => {
+    setFocus(f)
+    next(f)
+  }
   useEffect(() => () => window.clearTimeout(advanceTimer.current), [])
 
   const up = rankValue(hand.dealerUp.rank)
@@ -89,7 +88,7 @@ export function StrategyDrill() {
         </div>
         <div className="segmented">
           {FOCUSES.map((f) => (
-            <button key={f.id} className={focus === f.id ? 'on' : ''} onClick={() => setFocus(f.id)}>
+            <button key={f.id} className={focus === f.id ? 'on' : ''} onClick={() => changeFocus(f.id)}>
               {f.label}
             </button>
           ))}
@@ -98,7 +97,10 @@ export function StrategyDrill() {
 
       <div className="scorebar">
         <span>
-          Score <b>{score.correct}/{score.attempts}</b>
+          Score{' '}
+          <b>
+            {score.correct}/{score.attempts}
+          </b>
           {accuracy !== null && <em> ({accuracy}%)</em>}
         </span>
         <span>
@@ -164,7 +166,8 @@ export function StrategyDrill() {
           />
           {answer?.rec.deviation && hand.tc !== null && (
             <p className="index-note">
-              Count-based play: <b>{deviationLabel(answer.rec.deviation)}</b>. The chart shows the basic-strategy play it overrides.
+              Count-based play: <b>{deviationLabel(answer.rec.deviation)}</b>. The chart shows the basic-strategy play it
+              overrides.
             </p>
           )}
           <p className="muted small">The matching cell lights up after you answer. Charts follow your table rules in Settings.</p>

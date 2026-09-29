@@ -1,7 +1,7 @@
 import { cardOfValue, randomUpcardValue, type Card, type Rng } from './cards'
 import { deviationsFor, type Deviation } from './deviations'
-import { isPair } from './hand'
-import type { Rules } from './rules'
+import { handTotal, isPair } from './hand'
+import { doubleAllowedFor, type Rules } from './rules'
 import type { Availability } from './strategy'
 
 export type DrillFocus = 'all' | 'hard' | 'soft' | 'pairs' | 'deviations'
@@ -34,13 +34,26 @@ function threeCardHard(total: number, rng: Rng): number[] {
   return [a, b, rest - b]
 }
 
-function build(values: number[], upValue: number, rules: Rules, rng: Rng, tc: number | null = null, deviation?: Deviation): DrillHand {
+function build(
+  values: number[],
+  upValue: number,
+  rules: Rules,
+  rng: Rng,
+  tc: number | null = null,
+  deviation?: Deviation,
+): DrillHand {
   const cards = values.map((v) => cardOfValue(v, rng))
   const two = cards.length === 2
+  const { total, soft } = handTotal(cards)
   return {
     cards,
     dealerUp: cardOfValue(upValue, rng),
-    avail: { canDouble: two, canSplit: two && isPair(cards), canSurrender: two && rules.surrender },
+    avail: {
+      canHit: true,
+      canDouble: two && doubleAllowedFor(total, soft, rules),
+      canSplit: two && isPair(cards),
+      canSurrender: two && rules.surrender,
+    },
     tc,
     deviation,
   }

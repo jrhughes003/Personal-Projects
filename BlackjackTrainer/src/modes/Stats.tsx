@@ -1,5 +1,5 @@
 import { StatTile } from '../components/StatTile'
-import { useApp } from '../store/AppContext'
+import { useApp } from '../store/context'
 import { pct, today, type DayStats, type Tally } from '../store/stats'
 
 const fmtPct = (t: Tally) => {
@@ -54,7 +54,8 @@ function TrendChart({ daily }: { daily: Record<string, DayStats> }) {
   return (
     <div className="trend">
       <div className="trend-legend">
-        <span className="sw sw-a" /> Play accuracy <span className="sw sw-b" /> Count accuracy <span className="muted">· last 14 days</span>
+        <span className="sw sw-a" /> Play accuracy <span className="sw sw-b" /> Count accuracy{' '}
+        <span className="muted">· last 14 days</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Accuracy over the last 14 days">
         {[0, 50, 100].map((g) => (
@@ -74,8 +75,22 @@ function TrendChart({ daily }: { daily: Record<string, DayStats> }) {
         )}
         <path d={path(strat)} className="line-a" />
         <path d={path(count)} className="line-b" />
-        {strat.map((p, i) => p && <circle key={`a${i}`} cx={p.x} cy={p.y} r={3.5} className="dot-a"><title>{`${days[i]}: ${p.p.toFixed(0)}%`}</title></circle>)}
-        {count.map((p, i) => p && <circle key={`b${i}`} cx={p.x} cy={p.y} r={3.5} className="dot-b"><title>{`${days[i]}: ${p.p.toFixed(0)}%`}</title></circle>)}
+        {strat.map(
+          (p, i) =>
+            p && (
+              <circle key={`a${i}`} cx={p.x} cy={p.y} r={3.5} className="dot-a">
+                <title>{`${days[i]}: ${p.p.toFixed(0)}%`}</title>
+              </circle>
+            ),
+        )}
+        {count.map(
+          (p, i) =>
+            p && (
+              <circle key={`b${i}`} cx={p.x} cy={p.y} r={3.5} className="dot-b">
+                <title>{`${days[i]}: ${p.p.toFixed(0)}%`}</title>
+              </circle>
+            ),
+        )}
         {!any && (
           <text x={W / 2} y={H / 2} textAnchor="middle" className="axis">
             Train a little and your daily accuracy shows up here.
@@ -88,6 +103,7 @@ function TrendChart({ daily }: { daily: Record<string, DayStats> }) {
 
 export function Stats() {
   const { stats, resetStats } = useApp()
+  const sideNet = stats.sideBets.returned - stats.sideBets.wagered
 
   const missed = Object.entries(stats.situations)
     .map(([k, v]) => ({ key: k, ...v, misses: v.attempts - v.correct }))
@@ -118,6 +134,15 @@ export function Stats() {
         <StatTile label="Count accuracy" value={fmtPct(stats.count)} sub={`${stats.count.attempts} checks`} />
         <StatTile label="Bet ramp" value={fmtPct(stats.bets)} sub={`${stats.bets.attempts} bets`} />
         <StatTile label="Insurance calls" value={fmtPct(stats.insurance)} sub={`${stats.insurance.attempts} offers`} />
+        <StatTile
+          label="Side bet discipline"
+          value={fmtPct(stats.sideBets.decisions)}
+          sub={
+            stats.sideBets.wagered
+              ? `net ${sideNet < 0 ? '−' : '+'}$${Math.abs(sideNet).toLocaleString()} on $${stats.sideBets.wagered.toLocaleString()} wagered`
+              : 'no side bets yet'
+          }
+        />
         <StatTile
           label="Table results"
           value={`${stats.net < 0 ? '−' : '+'}$${Math.abs(stats.net).toLocaleString()}`}
@@ -175,9 +200,17 @@ export function Stats() {
               <tbody>
                 {stats.countLog.slice(0, 15).map((c, i) => (
                   <tr key={i}>
-                    <td>{new Date(c.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</td>
                     <td>
-                      {{ flash: 'Flash', countdown: 'Countdown', truecount: 'True count', table: 'Table check' }[c.mode]} · {c.system}
+                      {new Date(c.at).toLocaleString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
+                    </td>
+                    <td>
+                      {{ flash: 'Flash', countdown: 'Countdown', truecount: 'True count', table: 'Table check' }[c.mode]} ·{' '}
+                      {c.system}
                     </td>
                     <td>{c.detail}</td>
                     <td className={`num ${c.correct ? 'pos' : 'neg'}`}>{c.correct ? '✓' : '✗'}</td>

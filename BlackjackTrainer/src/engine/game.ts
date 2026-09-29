@@ -1,7 +1,15 @@
 import { makeShoe, rankValue, type Card, type Rng } from './cards'
 import { tagOf, type SystemId } from './counting'
 import { handTotal, isBlackjack, isPair } from './hand'
-import type { Rules } from './rules'
+import { doubleAllowedFor, type Rules } from './rules'
+import {
+  classify21Plus3,
+  classifyBuster,
+  classifyLuckyLadies,
+  classifyPerfectPairs,
+  type Paytable,
+  type SideBetId,
+} from './sidebets'
 import type { Action, Availability } from './strategy'
 
 export type Outcome = 'blackjack' | 'win' | 'push' | 'lose' | 'bust' | 'surrender'
@@ -17,6 +25,21 @@ export interface PlayerHand {
   outcome?: Outcome
   /** Amount returned to the bankroll at settlement, stake included. */
   payout?: number
+}
+
+export interface SideBetStake {
+  id: SideBetId
+  amount: number
+  paytable: Paytable
+}
+
+export interface SideBetResult {
+  id: SideBetId
+  amount: number
+  /** Outcome key from the side bet's paytable, or null for a loss. */
+  outcome: string | null
+  /** Returned to the bankroll, stake included (0 on a loss). */
+  payout: number
 }
 
 export interface GameState {
@@ -36,6 +59,8 @@ export interface GameState {
   holeRevealed: boolean
   insurance: number
   insuranceTaken: boolean | null
+  sideBets: SideBetStake[]
+  sideResults: SideBetResult[]
   /** Set on the round that followed a reshuffle, so the UI can announce it. */
   shuffled: boolean
   rounds: number
@@ -67,6 +92,8 @@ export function newGame(opts: NewGameOptions): GameState {
     holeRevealed: false,
     insurance: 0,
     insuranceTaken: null,
+    sideBets: [],
+    sideResults: [],
     shuffled: false,
     rounds: 0,
   }
@@ -93,6 +120,7 @@ function clone(s: GameState): GameState {
     ...s,
     hands: s.hands.map((h) => ({ ...h, cards: h.cards.slice() })),
     dealer: s.dealer.slice(),
+    sideResults: s.sideResults.slice(),
   }
 }
 
@@ -116,9 +144,11 @@ function revealHole(s: GameState): void {
 
 // ---- round flow ----
 
-export function placeBet(state: GameState, amount: number, rng?: Rng): GameState {
+export function placeBet(state: GameState, amount: number, rng?: Rng, sideBets: SideBetStake[] = []): GameState {
   if (state.phase !== 'betting' && state.phase !== 'settled') throw new Error('not taking bets now')
-  if (amount <= 0 || amount > state.bankroll) throw new Error('invalid bet')
+  const sideTotal = sideBets.reduce((sum, b) => sum + b.amount, 0)
+  if (amount <= 0 || amount + sideTotal > state.bankroll) throw new Error('invalid bet')
+  if (sideBets.some((b) => b.amount <= 0)) throw new Error('invalid side bet')
   const s = clone(state)
   s.shuffled = false
   if (needsShuffle(s)) {
@@ -128,7 +158,9 @@ export function placeBet(state: GameState, amount: number, rng?: Rng): GameState
     s.runningCount = 0
     s.shuffled = true
   }
-  s.bankroll -= amount
+  s.bankroll -= amount + sideTotal
+  s.sideBets = sideBets
+  s.sideResults = []
   s.rounds += 1
   s.insurance = 0
   s.insuranceTaken = null
@@ -141,12 +173,37 @@ export function placeBet(state: GameState, amount: number, rng?: Rng): GameState
   s.dealer.push(draw(s))
   hand.cards.push(draw(s))
   s.dealer.push(draw(s, false))
+  resolveOnDeal(s)
 
   if (rankValue(s.dealer[0].rank) === 11) {
     s.phase = 'insurance'
     return s
   }
   return afterPeek(s)
+}
+
+function stake(s: GameState, id: SideBetId): SideBetStake | undefined {
+  return s.sideBets.find((b) => b.id === id)
+}
+
+function payout(s: GameState, bet: SideBetStake, outcome: string | null): void {
+  const odds = outcome ? (bet.paytable.pays[outcome] ?? 0) : 0
+  const paid = odds > 0 ? bet.amount * (odds + 1) : 0
+  s.sideResults.push({ id: bet.id, amount: bet.amount, outcome: odds > 0 ? outcome : null, payout: paid })
+  s.bankroll += paid
+}
+
+/** 21+3 and Perfect Pairs are paid as soon as the cards are out, like at a real table. */
+function resolveOnDeal(s: GameState): void {
+  const [p1, p2] = s.hands[0].cards
+  const tpt = stake(s, 'twentyOneThree')
+  if (tpt) payout(s, tpt, classify21Plus3([p1, p2, s.dealer[0]]))
+  const pp = stake(s, 'perfectPairs')
+  if (pp) payout(s, pp, classifyPerfectPairs([p1, p2]))
+}
+
+function busterActive(s: GameState): boolean {
+  return !!stake(s, 'buster')
 }
 
 export function canAffordInsurance(s: GameState): boolean {
@@ -171,14 +228,19 @@ function dealerHasBlackjack(s: GameState): boolean {
 /** Dealer checks for blackjack under an ace or ten; then naturals are paid. */
 function afterPeek(s: GameState): GameState {
   const up = rankValue(s.dealer[0].rank)
-  if ((up === 11 || up === 10) && dealerHasBlackjack(s)) {
+  const dealerBj = (up === 11 || up === 10) && dealerHasBlackjack(s)
+  const ll = stake(s, 'luckyLadies')
+  if (ll) payout(s, ll, classifyLuckyLadies(s.hands[0].cards, dealerBj))
+  if (dealerBj) {
     revealHole(s)
     s.hands[0].done = true
     return settle(s)
   }
   if (isBlackjack(s.hands[0].cards)) {
-    revealHole(s)
     s.hands[0].done = true
+    // A Buster bet in action makes the dealer play the hand out.
+    if (busterActive(s)) return playDealer(s)
+    revealHole(s)
     return settle(s)
   }
   s.phase = 'player'
@@ -186,14 +248,16 @@ function afterPeek(s: GameState): GameState {
 }
 
 export function availability(s: GameState): Availability {
-  if (s.phase !== 'player') return { canDouble: false, canSplit: false, canSurrender: false }
+  if (s.phase !== 'player') return { canHit: false, canDouble: false, canSplit: false, canSurrender: false }
   const h = s.hands[s.active]
   const twoCards = h.cards.length === 2
   const affordable = s.bankroll >= h.bet
+  const { total, soft } = handTotal(h.cards)
   return {
-    canDouble: twoCards && affordable && !h.splitAces && (!h.fromSplit || s.rules.das),
+    canHit: !h.splitAces,
+    canDouble: twoCards && affordable && !h.splitAces && (!h.fromSplit || s.rules.das) && doubleAllowedFor(total, soft, s.rules),
     canSplit:
-      twoCards && affordable && isPair(h.cards) && s.hands.length < s.rules.maxHands && !h.splitAces,
+      twoCards && affordable && isPair(h.cards) && s.hands.length < s.rules.maxHands && (!h.splitAces || s.rules.resplitAces),
     canSurrender: twoCards && s.rules.surrender && !h.fromSplit && s.hands.length === 1,
   }
 }
@@ -201,6 +265,7 @@ export function availability(s: GameState): Availability {
 export function act(state: GameState, action: Action): GameState {
   if (state.phase !== 'player') throw new Error('not the player turn')
   const avail = availability(state)
+  if (action === 'hit' && !avail.canHit) throw new Error('cannot hit split aces')
   if (action === 'double' && !avail.canDouble) throw new Error('cannot double')
   if (action === 'split' && !avail.canSplit) throw new Error('cannot split')
   if (action === 'surrender' && !avail.canSurrender) throw new Error('cannot surrender')
@@ -251,11 +316,12 @@ export function act(state: GameState, action: Action): GameState {
       h.splitAces = aces
       s.hands.splice(s.active + 1, 0, second)
       if (aces) {
-        // Split aces get one card each and no further play.
-        h.cards.push(draw(s))
-        second.cards.push(draw(s))
-        h.done = true
-        second.done = true
+        // Split aces get one card each; with RSA a hand that catches another ace may split again.
+        for (const x of [h, second]) {
+          x.cards.push(draw(s))
+          const resplittable = s.rules.resplitAces && rankValue(x.cards[1].rank) === 11 && s.hands.length < s.rules.maxHands
+          x.done = !resplittable
+        }
       } else {
         h.cards.push(draw(s))
         if (handTotal(h.cards).total === 21) h.done = true
@@ -291,7 +357,7 @@ export function dealerShouldHit(cards: readonly Card[], h17: boolean): boolean {
 
 function playDealer(s: GameState): GameState {
   revealHole(s)
-  const live = s.hands.some((h) => h.outcome !== 'bust' && h.outcome !== 'surrender')
+  const live = s.hands.some((h) => h.outcome !== 'bust' && h.outcome !== 'surrender') || busterActive(s)
   if (live) {
     while (dealerShouldHit(s.dealer, s.rules.h17)) s.dealer.push(draw(s))
   }
@@ -303,6 +369,8 @@ function settle(s: GameState): GameState {
   const dealerBj = dealerHasBlackjack(s)
 
   if (s.insurance > 0 && dealerBj) s.bankroll += s.insurance * 3
+  const buster = stake(s, 'buster')
+  if (buster) payout(s, buster, dealerBj ? null : classifyBuster(s.dealer))
 
   for (const h of s.hands) {
     const total = handTotal(h.cards).total
@@ -343,10 +411,20 @@ function settle(s: GameState): GameState {
   return s
 }
 
-/** Net result of the settled round, insurance included. */
-export function roundNet(s: GameState): number {
+/** Net result of the main hands and insurance in a settled round. */
+export function mainNet(s: GameState): number {
   const staked = s.hands.reduce((sum, h) => sum + h.bet, 0) + s.insurance
   const returned =
     s.hands.reduce((sum, h) => sum + (h.payout ?? 0), 0) + (s.insurance > 0 && dealerHasBlackjack(s) ? s.insurance * 3 : 0)
   return returned - staked
+}
+
+/** Net result of the side bets in a round. */
+export function sideNet(s: GameState): number {
+  return s.sideResults.reduce((sum, r) => sum + r.payout - r.amount, 0)
+}
+
+/** Net result of the whole settled round. */
+export function roundNet(s: GameState): number {
+  return mainNet(s) + sideNet(s)
 }

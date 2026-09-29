@@ -18,7 +18,17 @@ export interface CountSession {
   detail: string
 }
 
+export interface SideBetStats {
+  wagered: number
+  returned: number
+  /** Graded side-bet choices: betting a −EV spot or skipping a +EV one is wrong. */
+  decisions: Tally
+}
+
+export const STATS_VERSION = 2
+
 export interface Stats {
+  version: number
   /** Keyed by situation label, e.g. "Hard 16 vs 10" or "I18: 16 vs 10". */
   situations: Record<string, Tally & { expected: string }>
   strategy: Tally
@@ -31,9 +41,11 @@ export interface Stats {
   daily: Record<string, DayStats>
   countLog: CountSession[]
   bestCountdownMs: number | null
+  sideBets: SideBetStats
 }
 
 export const EMPTY_STATS: Stats = {
+  version: STATS_VERSION,
   situations: {},
   strategy: { attempts: 0, correct: 0 },
   deviations: { attempts: 0, correct: 0 },
@@ -45,6 +57,17 @@ export const EMPTY_STATS: Stats = {
   daily: {},
   countLog: [],
   bestCountdownMs: null,
+  sideBets: { wagered: 0, returned: 0, decisions: { attempts: 0, correct: 0 } },
+}
+
+/** Upgrade older saves: v1 had no version field and no side-bet stats. */
+export function normalizeStats(raw: Partial<Stats> | null | undefined): Stats {
+  const s = { ...EMPTY_STATS, ...(raw ?? {}) }
+  return {
+    ...s,
+    version: STATS_VERSION,
+    sideBets: { ...EMPTY_STATS.sideBets, ...(raw?.sideBets ?? {}) },
+  }
 }
 
 export const STATS_KEY = 'bjt:stats:v1'
@@ -112,4 +135,13 @@ export function withTally(s: Stats, key: 'insurance' | 'bets', correct: boolean)
 
 export function pct(t: Tally): number | null {
   return t.attempts === 0 ? null : (t.correct / t.attempts) * 100
+}
+
+export function withSideBets(s: Stats, wagered: number, returned: number, graded: boolean[]): Stats {
+  let decisions = s.sideBets.decisions
+  for (const ok of graded) decisions = bump(decisions, ok)
+  return {
+    ...s,
+    sideBets: { wagered: s.sideBets.wagered + wagered, returned: s.sideBets.returned + returned, decisions },
+  }
 }

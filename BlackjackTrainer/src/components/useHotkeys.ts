@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
+import { ViewActiveContext } from './viewActive'
 
 const NON_TEXT_INPUTS = new Set(['checkbox', 'radio', 'range', 'button', 'submit'])
 
@@ -11,9 +12,12 @@ function isTyping(target: EventTarget | null): boolean {
 /** Single-key shortcuts, ignored while typing in a field. Keys are lower-case `event.key` values. */
 export function useHotkeys(map: Record<string, () => void>, enabled = true): void {
   const ref = useRef(map)
-  ref.current = map
+  const active = useContext(ViewActiveContext)
   useEffect(() => {
-    if (!enabled) return
+    ref.current = map
+  })
+  useEffect(() => {
+    if (!enabled || !active) return
     const onKey = (e: KeyboardEvent) => {
       if (isTyping(e.target)) return
       if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -25,5 +29,5 @@ export function useHotkeys(map: Record<string, () => void>, enabled = true): voi
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [enabled])
+  }, [enabled, active])
 }

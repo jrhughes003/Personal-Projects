@@ -1,0 +1,71 @@
+name: Blackjack Trainer release
+
+# Push a tag like `blackjack-trainer-v1.0.0` (matching package.json's version)
+# to build Windows, macOS and Linux installers and attach them to a GitHub Release.
+on:
+  push:
+    tags: ['blackjack-trainer-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: BlackjackTrainer
+
+jobs:
+  package:
+    name: Package (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: BlackjackTrainer/.nvmrc
+          cache: npm
+          cache-dependency-path: BlackjackTrainer/package-lock.json
+      - name: Tag matches package.json
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          test "${GITHUB_REF_NAME}" = "blackjack-trainer-v${version}" || {
+            echo "Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"; exit 1; }
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist
+        env:
+          # Builds are unsigned; see DECISIONS.md. Stops electron-builder hunting for a signing identity on macOS.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: |
+            BlackjackTrainer/release/*.exe
+            BlackjackTrainer/release/*.dmg
+            BlackjackTrainer/release/*.AppImage
+            BlackjackTrainer/release/*.deb
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Blackjack Trainer ${{ github.ref_name }}
+          files: installers/*
+          generate_release_notes: true

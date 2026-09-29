@@ -83,7 +83,7 @@ export function StrategyChart({ rules, table, highlight, compact }: Props) {
                     </td>
                   )
                 }
-                const code = displayCode(codeFor(key, col), rules)
+                const code = displayCode(codeFor(key, col), rules, table, key)
                 return (
                   <td key={d} className={`${CODE_CLASS[code]} ${cellHl ? 'hl-cell' : ''}`}>
                     {code}
