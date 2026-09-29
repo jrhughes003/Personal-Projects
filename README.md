@@ -9,13 +9,19 @@ A collection of my programming projects, from high-school coursework to universi
 
 A local-first personal finance app that runs as a desktop app (Electron + SQLite) or in the browser (localStorage) from one codebase. Transaction ledger with CSV import/export, budgets with real rollover, analytics and forecasting, savings goals, investment and debt tracking, and a long-range "Plan Ahead" projection with Canadian tax treatment and Monte Carlo simulation. Optional AI features are opt-in and limited by a per-feature allow-list to the minimum data each one needs.
 
-→ Lives in its own repository: **[jrhughes003/financeflow](https://github.com/jrhughes003/financeflow)**
+→ **[Live demo](https://jrhughes003.github.io/financeflow/)** · **[Source](https://github.com/jrhughes003/financeflow)**
+
+### [Portfolio Website](https://jrhughes003.github.io/Jonny-Hughes/)
+**HTML · CSS · JavaScript**
+
+My personal portfolio, hosted on GitHub Pages.
+
+→ **[Visit the site](https://jrhughes003.github.io/Jonny-Hughes/)** · **[Source](https://github.com/jrhughes003/Jonny-Hughes)**
 
 ## Projects
 
 | Project | Tech | Description |
 | --- | --- | --- |
-| [Portfolio Website](web/portfolio-website/) | HTML, CSS, JavaScript | Responsive portfolio site with project cards, experience timeline, and mobile navigation. |
 | [Recycling Robot Controller](robotics/recycling-robot/) | Python | University design project: classifies containers with inductive, photoelectric, and load-cell sensors, then drives a line-following robot to deliver them to the right bin. |
 | [Musical Script Analyzer](tools/musical-script-analyzer/) | Python | Parses a musical's script (PDF, text, or `.sbx`) and reports each character's lines by scene and song. |
 | [Unity Racing Game](games/unity-racing-game/) | C#, Unity | Gameplay scripts for a racing game: car selection, countdown, AI opponents, lap timing, and camera control. *(High school)* |
@@ -28,7 +34,6 @@ A local-first personal finance app that runs as a desktop app (Electron + SQLite
 ```
 .
 ├── web/
-│   ├── portfolio-website/     # Static portfolio site
 │   ├── php-blog/              # PHP + MySQL blog
 │   └── php-dice-game/         # PHP dice game
 ├── games/
