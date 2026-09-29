@@ -69,7 +69,7 @@ jobs:
       - id: version
         working-directory: .
         run: echo "version=${GITHUB_REF_NAME#blackjack-trainer-v}" >> "$GITHUB_OUTPUT"
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: Blackjack Trainer ${{ steps.version.outputs.version }}
           files: installers/*
