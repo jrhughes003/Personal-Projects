@@ -134,27 +134,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return emailRegex.test(email);
     }
 
-    // Form submission simulation
+    // GitHub Pages is static, so hand the message to the visitor's email client
     function submitContactForm(name, email, subject, message) {
-        const submitBtn = contactForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        
-        // Show loading state
-        submitBtn.textContent = 'Sending...';
-        submitBtn.disabled = true;
-
-        // Simulate API call
-        setTimeout(() => {
-            // Reset form
-            contactForm.reset();
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            
-            showNotification('Thank you for your message! I\'ll get back to you soon.', 'success');
-            
-            // In a real application, you would send the data to your server
-            console.log('Form submitted:', { name, email, subject, message });
-        }, 2000);
+        const body = `${message}\n\n— ${name} (${email})`;
+        window.location.href = 'mailto:jrhughes003@gmail.com'
+            + '?subject=' + encodeURIComponent(subject)
+            + '&body=' + encodeURIComponent(body);
+        showNotification('Opening your email app to send the message.', 'success');
     }
 
     // Notification system

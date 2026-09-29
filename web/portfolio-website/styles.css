@@ -293,7 +293,7 @@ p {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 3px dashed var(--border-color);
+    border: 3px solid var(--primary-color);
 }
 
 .image-placeholder i {
@@ -825,4 +825,10 @@ textarea:focus {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+.image-placeholder .initials {
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: 0.05em;
 }
