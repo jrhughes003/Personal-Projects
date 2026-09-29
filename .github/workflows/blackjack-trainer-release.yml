@@ -64,8 +64,13 @@ jobs:
         with:
           path: installers
           merge-multiple: true
+      # blackjack-trainer-v1.2.3 → 1.2.3, so the title reads "Blackjack Trainer 1.2.3".
+      # This job has no checkout, so the workflow's default working directory doesn't exist here.
+      - id: version
+        working-directory: .
+        run: echo "version=${GITHUB_REF_NAME#blackjack-trainer-v}" >> "$GITHUB_OUTPUT"
       - uses: softprops/action-gh-release@v2
         with:
-          name: Blackjack Trainer ${{ github.ref_name }}
+          name: Blackjack Trainer ${{ steps.version.outputs.version }}
           files: installers/*
           generate_release_notes: true
